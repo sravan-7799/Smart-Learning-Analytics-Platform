@@ -83,8 +83,7 @@ elif page == "Data Visualization":
         ax.set_yticks(range(len(corr.columns)))
         ax.set_xticklabels(corr.columns, rotation=90)
         ax.set_yticklabels(corr.columns)
-
-    st.pyplot(fig)
+        st.pyplot(fig)
 
 
     # Bar Chart
