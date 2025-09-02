@@ -208,8 +208,13 @@ elif page == "Prediction":
         st.write(f"Predicted Outcome: {grade}")
         st.write(f"Predicted Exam Score: {predicted_score:.2f}")
 
+        gif_dir = os.path.join(os.getcwd(), "gifs")  # change "gifs" if stored in another folder
+
         # Display GIF based on pass/fail outcome
         if predicted_class == 1:
-            st.image('pass.gif', width=300)  # Replace with your pass GIF file path
+            gif_path = os.path.join(gif_dir, "pass.gif")
+            st.image(gif_path, width=300)
         else:
-            st.image('fail.gif', width=300)  # Replace with your fail GIF file path
+            gif_path = os.path.join(gif_dir, "fail.gif")
+            st.image(gif_path, width=300)
+
