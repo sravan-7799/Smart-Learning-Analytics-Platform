@@ -63,7 +63,10 @@ inject_css()
 
 # --------- Sidebar ----------
 with st.sidebar:
-    st.image(IMG_HOME, use_column_width=True) if os.path.exists(IMG_HOME) else st.empty()
+    if os.path.exists(IMG_HOME):
+        st.image(IMG_HOME, use_column_width=True)
+    else:
+        st.warning("⚠️ Home image not found. Please add it to the project folder.")
     st.title("📊 Navigation")
     page = st.radio("Go to", ["Home", "Data Visualization", "Prediction"], index=0)
     dark_mode = st.toggle("🌙 Dark Mode", False)
