@@ -77,7 +77,7 @@ elif page == "Data Visualization":
         corr = numerical_data.corr()
         
         fig, ax = plt.subplots(figsize=(10, 8))
-        sns.heatmap(corr, annot=True, cmap='coolwarm', ax=ax)
+        st.heatmap(corr, annot=True, cmap='coolwarm', ax=ax)
         st.pyplot(fig)
 
     # Bar Chart
@@ -110,14 +110,14 @@ elif page == "Data Visualization":
     elif plot_type == "Boxplot":
         st.write(f"Boxplot of {feature}")
         fig, ax = plt.subplots()
-        sns.boxplot(data=data, y=feature, ax=ax)
+        st.boxplot(data=data, y=feature, ax=ax)
         st.pyplot(fig)
 
     # Scatter Plot
     elif plot_type == "Scatter Plot":
         st.write(f"Scatter Plot between {x_feature} and {y_feature}")
         fig, ax = plt.subplots()
-        sns.scatterplot(data=data, x=x_feature, y=y_feature, ax=ax)
+        st.scatterplot(data=data, x=x_feature, y=y_feature, ax=ax)
         st.pyplot(fig)
 
     # Histogram
