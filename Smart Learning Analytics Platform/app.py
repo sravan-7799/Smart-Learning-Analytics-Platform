@@ -278,18 +278,92 @@ elif page == "Data Visualization":
             safe_plotly_chart(fig)
 
 
-    with t3:
-        st.markdown("#### Bivariate")
-        x_feature = st.selectbox("X", data.columns, index=data.columns.get_loc('Hours_Studied') if 'Hours_Studied' in data.columns else 0)
-        y_feature = st.selectbox("Y", data.columns, index=data.columns.get_loc('Exam_Score') if 'Exam_Score' in data.columns else 1)
-        color_by = st.selectbox("Color By (optional)", ["(none)"] + list(data.columns), index=0)
+        with t3:
+            st.markdown("### 🔗 Bivariate Analysis")
 
-        if x_feature and y_feature and x_feature != y_feature:
-            if color_by == "(none)":
-                fig = px.scatter(data, x=x_feature, y=y_feature, trendline="ols", title=f"{x_feature} vs {y_feature}")
-            else:
-                fig = px.scatter(data, x=x_feature, y=y_feature, color=color_by, trendline="ols", title=f"{x_feature} vs {y_feature} by {color_by}")
-            safe_plotly_chart(fig)
+            x_feature = st.selectbox(
+                "Select X-axis feature",
+                data.columns,
+                index=data.columns.get_loc("Hours_Studied") if "Hours_Studied" in data.columns else 0,
+            )
+            y_feature = st.selectbox(
+                "Select Y-axis feature",
+                data.columns,
+                index=data.columns.get_loc("Exam_Score") if "Exam_Score" in data.columns else 1,
+            )
+            color_by = st.selectbox(
+                "Color By (optional)",
+                ["(none)"] + list(data.columns),
+                index=0,
+            )
+
+            if x_feature and y_feature and x_feature != y_feature:
+                # Both numeric -> Scatter plot
+                if pd.api.types.is_numeric_dtype(data[x_feature]) and pd.api.types.is_numeric_dtype(data[y_feature]):
+                    if color_by == "(none)":
+                        fig = px.scatter(
+                            data,
+                            x=x_feature,
+                            y=y_feature,
+                            trendline="ols",
+                            title=f"{x_feature} vs {y_feature}",
+                            color_discrete_sequence=["#636EFA"],
+                        )
+                    else:
+                        fig = px.scatter(
+                            data,
+                            x=x_feature,
+                            y=y_feature,
+                            color=color_by,
+                            trendline="ols",
+                            title=f"{x_feature} vs {y_feature} by {color_by}",
+                        )
+                    fig.update_layout(template="plotly_white")
+                    safe_plotly_chart(fig)
+
+                # X categorical, Y numeric -> Bar plot (mean values)
+                elif not pd.api.types.is_numeric_dtype(data[x_feature]) and pd.api.types.is_numeric_dtype(data[y_feature]):
+                    df_group = data.groupby(x_feature)[y_feature].mean().reset_index()
+                    fig = px.bar(
+                        df_group,
+                        x=x_feature,
+                        y=y_feature,
+                        text_auto=True,
+                        title=f"Average {y_feature} by {x_feature}",
+                        color_discrete_sequence=["#00CC96"],
+                    )
+                    fig.update_layout(template="plotly_white", xaxis_title=x_feature, yaxis_title=f"Mean {y_feature}")
+                    safe_plotly_chart(fig)
+
+                # X numeric, Y categorical -> Horizontal bar
+                elif pd.api.types.is_numeric_dtype(data[x_feature]) and not pd.api.types.is_numeric_dtype(data[y_feature]):
+                    df_group = data.groupby(y_feature)[x_feature].mean().reset_index()
+                    fig = px.bar(
+                        df_group,
+                        x=x_feature,
+                        y=y_feature,
+                        orientation="h",
+                        text_auto=True,
+                        title=f"Average {x_feature} by {y_feature}",
+                        color_discrete_sequence=["#00CC96"],
+                    )
+                    fig.update_layout(template="plotly_white", xaxis_title=f"Mean {x_feature}", yaxis_title=y_feature)
+                    safe_plotly_chart(fig)
+
+                # Both categorical -> Grouped bar (counts)
+                else:
+                    df_counts = data.groupby([x_feature, y_feature]).size().reset_index(name="Count")
+                    fig = px.bar(
+                        df_counts,
+                        x=x_feature,
+                        y="Count",
+                        color=y_feature,
+                        barmode="group",
+                        title=f"{x_feature} vs {y_feature} (Counts)",
+                    )
+                    fig.update_layout(template="plotly_white", xaxis_title=x_feature, yaxis_title="Count")
+                    safe_plotly_chart(fig)
+
 
     with t4:
         st.markdown("#### Correlation Heatmap (numeric only)")
