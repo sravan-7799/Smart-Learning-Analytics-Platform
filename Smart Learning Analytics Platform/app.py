@@ -212,9 +212,9 @@ elif page == "Prediction":
 
         # Display GIF based on pass/fail outcome
         if predicted_class == 1:
-            gif_path = os.path.join(gif_dir, "pass.gif")
+            gif_path = os.path.join(base_dir, "gifs", "pass.gif")
             st.image(gif_path, width=300)
         else:
-            gif_path = os.path.join(gif_dir, "fail.gif")
+            gif_path = os.path.join(base_dir, "gifs", "fail.gif")
             st.image(gif_path, width=300)
 
