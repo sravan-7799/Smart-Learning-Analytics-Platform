@@ -14,7 +14,10 @@ with open(css_path) as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 # Load data
-data = pd.read_csv('StudentPerformanceFactors.csv')
+csv_path = os.path.join(BASE_DIR, "StudentPerformanceFactors.csv")
+
+# Load data
+data = pd.read_csv(csv_path)
 
 # Add binary target column for pass/fail
 pass_threshold = 70  # Define a passing threshold for exam scores
