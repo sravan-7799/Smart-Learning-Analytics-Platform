@@ -243,7 +243,6 @@ elif page == "Data Visualization":
                     bargap=0.05,
                 )
                 safe_plotly_chart(fig)
-
             with tab2:
                 fig2 = px.box(
                     data,
@@ -259,14 +258,18 @@ elif page == "Data Visualization":
 
         # Categorical column case
         else:
+            df_counts = data[col].value_counts().reset_index()
+            df_counts.columns = [col, "Count"]  # Rename columns
+
             fig = px.bar(
-                data[col].value_counts().reset_index(),
-                x="index",
-                y=col,
+                df_counts,
+                x=col,
+                y="Count",
                 text_auto=True,
                 title=f"Counts of {col}",
                 color_discrete_sequence=["#00CC96"],
             )
+
             fig.update_layout(
                 xaxis_title=col,
                 yaxis_title="Count",
