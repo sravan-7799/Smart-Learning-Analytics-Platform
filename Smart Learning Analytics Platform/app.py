@@ -214,17 +214,66 @@ elif page == "Data Visualization":
             safe_plotly_chart(fig)
 
     with t2:
-        st.markdown("#### Univariate")
-        col = st.selectbox("Select a column", data.columns, index=list(data.columns).index('Exam_Score') if 'Exam_Score' in data.columns else 0)
+        st.markdown("### 📊 Univariate Analysis")
+
+        # Column selection with search
+        col = st.selectbox(
+            "🔎 Select a column for analysis",
+            data.columns,
+            index=list(data.columns).index("Exam_Score") if "Exam_Score" in data.columns else 0,
+        )
+
+        # Numeric column case
         if pd.api.types.is_numeric_dtype(data[col]):
-            fig = px.histogram(data, x=col, nbins=30, title=f"Distribution of {col}")
-            safe_plotly_chart(fig)
-            fig2 = px.box(data, y=col, title=f"Boxplot: {col}")
-            safe_plotly_chart(fig2)
+            tab1, tab2 = st.tabs(["📈 Distribution", "📦 Boxplot"])
+
+            with tab1:
+                fig = px.histogram(
+                    data,
+                    x=col,
+                    nbins=30,
+                    title=f"Distribution of {col}",
+                    marginal="rug",
+                    color_discrete_sequence=["#636EFA"],
+                )
+                fig.update_layout(
+                    xaxis_title=col,
+                    yaxis_title="Frequency",
+                    template="plotly_white",
+                    bargap=0.05,
+                )
+                safe_plotly_chart(fig)
+
+            with tab2:
+                fig2 = px.box(
+                    data,
+                    y=col,
+                    title=f"Boxplot of {col}",
+                    color_discrete_sequence=["#EF553B"],
+                )
+                fig2.update_layout(
+                    yaxis_title=col,
+                    template="plotly_white",
+                )
+                safe_plotly_chart(fig2)
+
+        # Categorical column case
         else:
-            fig = px.bar(data[col].value_counts().reset_index(), x='index', y=col, title=f"Counts: {col}", text_auto=True)
-            fig.update_layout(xaxis_title=col, yaxis_title="Count")
+            fig = px.bar(
+                data[col].value_counts().reset_index(),
+                x="index",
+                y=col,
+                text_auto=True,
+                title=f"Counts of {col}",
+                color_discrete_sequence=["#00CC96"],
+            )
+            fig.update_layout(
+                xaxis_title=col,
+                yaxis_title="Count",
+                template="plotly_white",
+            )
             safe_plotly_chart(fig)
+
 
     with t3:
         st.markdown("#### Bivariate")
