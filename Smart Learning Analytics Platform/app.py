@@ -8,7 +8,8 @@ from sklearn.metrics import accuracy_score, mean_squared_error
 import numpy as np
 
 # Load external stylesheet
-with open("style.css") as f:
+css_path = os.path.join(os.path.dirname(__file__), "style.css")
+with open(css_path) as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 # Load data
