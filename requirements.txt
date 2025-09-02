@@ -99,3 +99,4 @@ numpy
 scikit-learn
 matplotlib
 plotly
+statsmodels
