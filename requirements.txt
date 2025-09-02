@@ -99,4 +99,3 @@ numpy
 scikit-learn
 matplotlib
 plotly
-os
