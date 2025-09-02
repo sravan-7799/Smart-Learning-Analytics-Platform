@@ -35,7 +35,12 @@ page = st.sidebar.selectbox("Select Page", ["Home", "Data Visualization", "Predi
 # Home Page
 if page == "Home":
     st.title("Welcome to the Student Performance Analysis App")
-    st.image('image_home.jpeg', use_column_width=True)
+    image_path = os.path.join(BASE_DIR, "image_home.jpeg")
+    if os.path.exists(image_path):
+        st.image(image_path, use_column_width=True)
+    else:
+        st.warning("⚠️ image_home.jpeg not found. Please place it in the same folder as app.py")
+
     st.write(
         """
         This app predicts student performance based on various factors. 
