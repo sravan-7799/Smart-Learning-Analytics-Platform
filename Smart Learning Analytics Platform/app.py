@@ -115,7 +115,7 @@ elif page == "Data Visualization":
 
 # Prediction Page
 elif page == "Prediction":
-    st.title("Student Exam Performance Prediction")
+    st.title("Smart Learning Analytics Platform")
 
     # Define features and target variable for classification and regression
     classification_target = 'Pass_Fail'  # Binary target: 1 for pass, 0 for fail
