@@ -71,14 +71,21 @@ elif page == "Data Visualization":
     # Correlation Heatmap
     if plot_type == "Correlation Heatmap":
         st.write("Correlation Heatmap of the Dataset")
-        
         # Select only numerical columns for correlation calculation
         numerical_data = data.select_dtypes(include=[np.number])
         corr = numerical_data.corr()
-        
+
         fig, ax = plt.subplots(figsize=(10, 8))
-        st.heatmap(corr, annot=True, cmap='coolwarm', ax=ax)
-        st.pyplot(fig)
+        cax = ax.matshow(corr, cmap="coolwarm")  # heatmap
+        fig.colorbar(cax)
+
+        ax.set_xticks(range(len(corr.columns)))
+        ax.set_yticks(range(len(corr.columns)))
+        ax.set_xticklabels(corr.columns, rotation=90)
+        ax.set_yticklabels(corr.columns)
+
+    st.pyplot(fig)
+
 
     # Bar Chart
     elif plot_type == "Bar Chart":
