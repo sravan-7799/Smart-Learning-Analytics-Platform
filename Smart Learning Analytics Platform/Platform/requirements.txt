@@ -71,14 +71,13 @@ rich==13.9.3
 rpds-py==0.20.0
 scikit-learn==1.5.2
 scipy==1.14.1
-seaborn==0.13.2
+seaborn
 setuptools==75.1.0
 six==1.16.0
 smmap==5.0.1
 soupsieve==2.6
 stack-data==0.6.3
 streamlit==1.39.0
-seaborn 
 tenacity==9.0.0
 threadpoolctl @ file:///C:/b/abs_def0dwqlft/croot/threadpoolctl_1719407816649/work
 tinycss2==1.4.0
