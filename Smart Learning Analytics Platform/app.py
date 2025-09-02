@@ -8,6 +8,8 @@ from sklearn.metrics import accuracy_score, mean_squared_error
 import numpy as np
 import os
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 # Load external stylesheet
 css_path = os.path.join(os.path.dirname(__file__), "style.css")
 with open(css_path) as f:
