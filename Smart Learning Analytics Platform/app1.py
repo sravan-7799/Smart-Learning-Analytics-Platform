@@ -1,5 +1,5 @@
 import streamlit as st
-st.set_page_config(page_title="Student Performance Prediction App", page_icon="📊", layout="wide")
+st.set_page_config(page_title="Student Performance Prediction App", page_icon="📊")
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
@@ -17,53 +17,47 @@ with open(css_path) as f:
 
 csv_path = os.path.join(BASE_DIR, "StudentPerformanceFactors.csv")
 
-# Load dataset
+# Check if file exists before reading
 if os.path.exists(csv_path):
     data = pd.read_csv(csv_path)
-    st.markdown("### 📂 Student Data Preview")
-    st.dataframe(data.head(), use_container_width=True)
+    st.write("### Student Data Preview", data.head())
 else:
-    st.error(f"❌ CSV file not found at: {csv_path}")
+    st.error(f"CSV file not found at: {csv_path}")
+
 
 # Add binary target column for pass/fail
-pass_threshold = 70
+pass_threshold = 70  # Define a passing threshold for exam scores
 data['Pass_Fail'] = data['Exam_Score'].apply(lambda x: 1 if x >= pass_threshold else 0)
 
-# Sidebar
-st.sidebar.image(os.path.join(BASE_DIR, "image_home.jpeg"), use_column_width=True)
-st.sidebar.title("📊 Navigation")
-page = st.sidebar.radio("Go to", ["Home", "Data Visualization", "Prediction"])
+# Sidebar for page selection
+page = st.sidebar.selectbox("Select Page", ["Home", "Data Visualization", "Prediction"])
 
 # Home Page
 if page == "Home":
-    st.markdown('<h1 class="title">Welcome to the Student Performance Analysis App</h1>', unsafe_allow_html=True)
-
+    st.title("Welcome to the Student Performance Analysis App")
     image_path = os.path.join(BASE_DIR, "image_home.jpeg")
     if os.path.exists(image_path):
-        st.image(image_path, use_column_width=True, caption="Smart Learning Analytics")
+        st.image(image_path, use_column_width=True)
     else:
         st.warning("⚠️ image_home.jpeg not found. Please place it in the same folder as app.py")
 
-    st.markdown(
+    st.write(
         """
-        <div class="section">
-            <p>
-            This app predicts <b>student performance</b> based on multiple factors.  
-            ✅ Explore insights in the <b>Data Visualization</b> page.  
-            ✅ Use the <b>Prediction</b> page to test with your own inputs.  
-            </p>
-        </div>
-        """,
-        unsafe_allow_html=True
+        This app predicts student performance based on various factors. 
+        Use the Data Visualization page to explore insights in the dataset,
+        or head to the Prediction page to make predictions based on your inputs.
+        """
     )
 
 # Data Visualization Page
 elif page == "Data Visualization":
-    st.markdown('<h1 class="title">📊 Data Visualization</h1>', unsafe_allow_html=True)
+    st.title("Data Visualization")
+    st.write("Explore various visualizations of the student performance dataset.")
 
-    plot_type = st.sidebar.selectbox("Select Plot Type", 
-                                     ["Correlation Heatmap", "Bar Chart", "Pie Chart", "Line Chart", "Boxplot", "Scatter Plot", "Histogram"])
+    # Sidebar for selecting plot type
+    plot_type = st.sidebar.selectbox("Select Plot Type", ["Correlation Heatmap", "Bar Chart", "Pie Chart", "Line Chart", "Boxplot", "Scatter Plot", "Histogram"])
 
+    # Dropdown for feature selection based on the plot type
     if plot_type in ["Bar Chart", "Pie Chart", "Line Chart", "Boxplot", "Histogram"]:
         feature = st.sidebar.selectbox("Select Feature", data.columns)
 
@@ -71,100 +65,125 @@ elif page == "Data Visualization":
         x_feature = st.sidebar.selectbox("Select X-axis Feature", data.columns)
         y_feature = st.sidebar.selectbox("Select Y-axis Feature", data.columns)
 
+    # Plotting based on selected plot type
     st.subheader(f"{plot_type} Visualization")
 
+    # Correlation Heatmap
     if plot_type == "Correlation Heatmap":
+        st.write("Correlation Heatmap of the Dataset")
+        # Select only numerical columns for correlation calculation
         numerical_data = data.select_dtypes(include=[np.number])
         corr = numerical_data.corr()
 
         fig, ax = plt.subplots(figsize=(10, 8))
-        cax = ax.matshow(corr, cmap="coolwarm")
+        cax = ax.matshow(corr, cmap="coolwarm")  # heatmap
         fig.colorbar(cax)
+
         ax.set_xticks(range(len(corr.columns)))
         ax.set_yticks(range(len(corr.columns)))
         ax.set_xticklabels(corr.columns, rotation=90)
         ax.set_yticklabels(corr.columns)
         st.pyplot(fig)
 
+
+    # Bar Chart
     elif plot_type == "Bar Chart":
+        st.write(f"Bar Chart of {feature}")
         fig, ax = plt.subplots()
-        data[feature].value_counts().plot(kind='bar', ax=ax, color="#2E86C1")
+        data[feature].value_counts().plot(kind='bar', ax=ax)
         ax.set_xlabel(feature)
         ax.set_ylabel("Count")
         st.pyplot(fig)
 
+    # Pie Chart
     elif plot_type == "Pie Chart":
+        st.write(f"Pie Chart of {feature}")
         fig, ax = plt.subplots()
-        data[feature].value_counts().plot(kind='pie', autopct='%1.1f%%', ax=ax, startangle=90, colors=["#2E86C1","#5DADE2","#AED6F1"])
+        data[feature].value_counts().plot(kind='pie', autopct='%1.1f%%', ax=ax)
         ax.set_ylabel('')
         st.pyplot(fig)
 
+    # Line Chart
     elif plot_type == "Line Chart":
+        st.write(f"Line Chart of {feature}")
         fig, ax = plt.subplots()
-        data[feature].plot(kind='line', ax=ax, color="#2E86C1", linewidth=2)
+        data[feature].plot(kind='line', ax=ax)
         ax.set_xlabel("Index")
         ax.set_ylabel(feature)
         st.pyplot(fig)
 
+    # Boxplot
     elif plot_type == "Boxplot":
+        st.write(f"Boxplot of {feature}")
         fig, ax = plt.subplots()
-        data[feature].plot(kind='box', ax=ax, color="#2E86C1")
+        st.boxplot(data=data, y=feature, ax=ax)
         st.pyplot(fig)
 
+    # Scatter Plot
     elif plot_type == "Scatter Plot":
+        st.write(f"Scatter Plot between {x_feature} and {y_feature}")
         fig, ax = plt.subplots()
-        ax.scatter(data[x_feature], data[y_feature], alpha=0.7, color="#2E86C1")
-        ax.set_xlabel(x_feature)
-        ax.set_ylabel(y_feature)
+        st.scatterplot(data=data, x=x_feature, y=y_feature, ax=ax)
         st.pyplot(fig)
 
+    # Histogram
     elif plot_type == "Histogram":
+        st.write(f"Histogram of {feature}")
         fig, ax = plt.subplots()
-        data[feature].plot(kind='hist', bins=20, ax=ax, color="#2E86C1", alpha=0.8)
+        data[feature].plot(kind='hist', bins=20, ax=ax)
         ax.set_xlabel(feature)
         st.pyplot(fig)
 
 # Prediction Page
 elif page == "Prediction":
-    st.markdown('<h1 class="title">🤖 Smart Learning Analytics Platform</h1>', unsafe_allow_html=True)
+    st.title("Smart Learning Analytics Platform")
 
-    classification_target = 'Pass_Fail'
-    regression_target = 'Exam_Score'
+    # Define features and target variable for classification and regression
+    classification_target = 'Pass_Fail'  # Binary target: 1 for pass, 0 for fail
+    regression_target = 'Exam_Score'  # Target for score prediction
     feature_columns = ['Attendance', 'Hours_Studied', 'Previous_Scores', 'Access_to_Resources', 'Tutoring_Sessions']
     X = data[feature_columns]
     y_class = data[classification_target]
     y_reg = data[regression_target]
 
+    # One-hot encode categorical features
     X = pd.get_dummies(X)
 
+    # Split data
     X_train_class, X_test_class, y_train_class, y_test_class = train_test_split(X, y_class, test_size=0.2, random_state=42)
     X_train_reg, X_test_reg, y_train_reg, y_test_reg = train_test_split(X, y_reg, test_size=0.2, random_state=42)
 
+    # Train classification model
     classifier = RandomForestClassifier()
     classifier.fit(X_train_class, y_train_class)
+
+    # Calculate classification accuracy
     y_pred_class = classifier.predict(X_test_class)
     classification_accuracy = accuracy_score(y_test_class, y_pred_class)
 
-    st.markdown(f"<div class='section result'>✅ Classification Accuracy: {classification_accuracy*100:.2f}%</div>", unsafe_allow_html=True)
+    st.write(f"Classification Model Accuracy: {classification_accuracy * 100:.2f}%")
 
+    # Train regression model
     regressor = RandomForestRegressor()
     regressor.fit(X_train_reg, y_train_reg)
+
+    # Calculate regression accuracy (RMSE)
     y_pred_reg = regressor.predict(X_test_reg)
-    rmse = np.sqrt(mean_squared_error(y_test_reg, y_pred_reg))
+    mse = mean_squared_error(y_test_reg, y_pred_reg)
+    rmse = np.sqrt(mse)
 
-    st.markdown(f"<div class='section result'>📏 Regression RMSE: {rmse:.2f}</div>", unsafe_allow_html=True)
+    st.write(f"Regression Model RMSE: {rmse:.2f}")
 
-    st.subheader("📝 Enter student data:")
+    # Input fields for the specific features
+    st.subheader("Enter student data:")
 
-    col1, col2 = st.columns(2)
-    with col1:
-        attendance = st.number_input("Attendance (%)", min_value=0.0, max_value=100.0, step=1.0)
-        hours_studied = st.number_input("Hours Studied per Week", min_value=0.0, max_value=50.0, step=0.5)
-        previous_scores = st.number_input("Previous Scores (out of 100)", min_value=0.0, max_value=100.0, step=1.0)
-    with col2:
-        access_to_resources = st.selectbox("Access to Resources", ['Low', 'Medium', 'High'])
-        tutoring_sessions = st.number_input("Tutoring Sessions per Week", min_value=0, max_value=7, step=1)
+    attendance = st.number_input("Attendance (%)", min_value=0.0, max_value=100.0, step=1.0)
+    hours_studied = st.number_input("Hours Studied per Week", min_value=0.0, max_value=50.0, step=0.5)
+    previous_scores = st.number_input("Previous Scores (out of 100)", min_value=0.0, max_value=100.0, step=1.0)
+    access_to_resources = st.selectbox("Access to Resources", ['Low', 'Medium', 'High'])
+    tutoring_sessions = st.number_input("Number of Tutoring Sessions per Week", min_value=0, max_value=7, step=1)
 
+    # Prepare input data for prediction
     input_data = pd.DataFrame({
         'Attendance': [attendance],
         'Hours_Studied': [hours_studied],
@@ -173,21 +192,32 @@ elif page == "Prediction":
         'Tutoring_Sessions': [tutoring_sessions]
     })
 
+    # One-hot encode input data and align with training data columns
     input_data = pd.get_dummies(input_data)
     input_data = input_data.reindex(columns=X_train_class.columns, fill_value=0)
 
-    if st.button("🚀 Predict"):
+    # Make predictions
+    if st.button("Predict"):
+        # Predict pass/fail outcome
         predicted_class = classifier.predict(input_data)[0]
         grade = "🎉 Pass 🎉" if predicted_class == 1 else "❌ Fail ❌"
+        
+        # Predict exam score
         predicted_score = regressor.predict(input_data)[0]
 
-        st.markdown(f"<div class='result'>Predicted Outcome: {grade}</div>", unsafe_allow_html=True)
-        st.markdown(f"<div class='result'>Predicted Exam Score: {predicted_score:.2f}</div>", unsafe_allow_html=True)
+        st.write(f"Predicted Outcome: {grade}")
+        st.write(f"Predicted Exam Score: {predicted_score:.2f}")
 
+        base_dir = os.path.dirname(__file__)
+
+        # Decide gif based on prediction
         gif_file = "pass.gif" if predicted_class == 1 else "fail.gif"
-        gif_path = os.path.join(BASE_DIR, "gifs", gif_file)
+        gif_path = os.path.join(base_dir, "gifs", gif_file)
 
+        # Check if file exists before displaying
         if os.path.exists(gif_path):
             st.image(gif_path, width=300)
         else:
             st.error(f"GIF file not found: {gif_path}")
+
+
