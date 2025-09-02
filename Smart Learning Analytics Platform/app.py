@@ -13,11 +13,15 @@ css_path = os.path.join(os.path.dirname(__file__), "style.css")
 with open(css_path) as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-# Load data
 csv_path = os.path.join(BASE_DIR, "StudentPerformanceFactors.csv")
 
-# Load data
-data = pd.read_csv(csv_path)
+# Check if file exists before reading
+if os.path.exists(csv_path):
+    data = pd.read_csv(csv_path)
+    st.write("### Student Data Preview", data.head())
+else:
+    st.error(f"CSV file not found at: {csv_path}")
+
 
 # Add binary target column for pass/fail
 pass_threshold = 70  # Define a passing threshold for exam scores
