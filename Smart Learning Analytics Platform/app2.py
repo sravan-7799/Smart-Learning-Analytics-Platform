@@ -1,40 +1,78 @@
 import streamlit as st
 st.set_page_config(page_title="Student Performance Prediction App", page_icon="📊", layout="wide")
+
 import pandas as pd
+import plotly.express as px
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.metrics import accuracy_score, mean_squared_error
 import numpy as np
 import os
+import time
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Load external stylesheet
-css_path = os.path.join(os.path.dirname(__file__), "style.css")
-with open(css_path) as f:
-    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+# ========== Custom Header ==========
+def custom_header(text, emoji="✨"):
+    st.markdown(
+        f"""
+        <div style="
+            background: linear-gradient(90deg, #42a5f5, #1e88e5);
+            padding: 14px 25px;
+            border-radius: 12px;
+            margin: 20px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            color: white;
+            font-size: 1.5em;
+            font-weight: 600;
+        ">
+        {emoji} {text}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
+# ========== Load External CSS ==========
+css_path = os.path.join(BASE_DIR, "style.css")
+if os.path.exists(css_path):
+    with open(css_path) as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+# ========== Load Dataset ==========
 csv_path = os.path.join(BASE_DIR, "StudentPerformanceFactors.csv")
 
-# Load dataset
 if os.path.exists(csv_path):
     data = pd.read_csv(csv_path)
-    st.markdown("### 📂 Student Data Preview")
-    st.dataframe(data.head(), use_container_width=True)
+    custom_header("📂 Student Data Preview")
+    st.dataframe(data.head(), use_container_width=True, height=250)
 else:
     st.error(f"❌ CSV file not found at: {csv_path}")
+    st.stop()
 
 # Add binary target column for pass/fail
 pass_threshold = 70
 data['Pass_Fail'] = data['Exam_Score'].apply(lambda x: 1 if x >= pass_threshold else 0)
 
-# Sidebar
+# ========== Sidebar ==========
 st.sidebar.image(os.path.join(BASE_DIR, "image_home.jpeg"), use_column_width=True)
 st.sidebar.title("📊 Navigation")
 page = st.sidebar.radio("Go to", ["Home", "Data Visualization", "Prediction"])
 
-# Home Page
+# Dark mode toggle
+dark_mode = st.sidebar.toggle("🌙 Dark Mode", False)
+if dark_mode:
+    st.markdown(
+        """
+        <style>
+        body { background: #121212; color: #e0e0e0; }
+        .section { background: #1e1e1e !important; color: #e0e0e0; }
+        .result { background: #263238 !important; color: #ffffff !important; }
+        </style>
+        """, unsafe_allow_html=True
+    )
+
+# ========== Home Page ==========
 if page == "Home":
     st.markdown('<h1 class="title">Welcome to the Student Performance Analysis App</h1>', unsafe_allow_html=True)
 
@@ -57,9 +95,9 @@ if page == "Home":
         unsafe_allow_html=True
     )
 
-# Data Visualization Page
+# ========== Data Visualization Page ==========
 elif page == "Data Visualization":
-    st.markdown('<h1 class="title">📊 Data Visualization</h1>', unsafe_allow_html=True)
+    custom_header("📊 Data Visualization")
 
     plot_type = st.sidebar.selectbox("Select Plot Type", 
                                      ["Correlation Heatmap", "Bar Chart", "Pie Chart", "Line Chart", "Boxplot", "Scatter Plot", "Histogram"])
@@ -74,59 +112,37 @@ elif page == "Data Visualization":
     st.subheader(f"{plot_type} Visualization")
 
     if plot_type == "Correlation Heatmap":
-        numerical_data = data.select_dtypes(include=[np.number])
-        corr = numerical_data.corr()
-
-        fig, ax = plt.subplots(figsize=(10, 8))
-        cax = ax.matshow(corr, cmap="coolwarm")
-        fig.colorbar(cax)
-        ax.set_xticks(range(len(corr.columns)))
-        ax.set_yticks(range(len(corr.columns)))
-        ax.set_xticklabels(corr.columns, rotation=90)
-        ax.set_yticklabels(corr.columns)
-        st.pyplot(fig)
+        corr = data.corr(numeric_only=True)
+        fig = px.imshow(corr, text_auto=True, color_continuous_scale="Blues")
+        st.plotly_chart(fig, use_container_width=True)
 
     elif plot_type == "Bar Chart":
-        fig, ax = plt.subplots()
-        data[feature].value_counts().plot(kind='bar', ax=ax, color="#2E86C1")
-        ax.set_xlabel(feature)
-        ax.set_ylabel("Count")
-        st.pyplot(fig)
+        fig = px.bar(data, x=feature, title=f"Bar Chart of {feature}", color=feature)
+        st.plotly_chart(fig, use_container_width=True)
 
     elif plot_type == "Pie Chart":
-        fig, ax = plt.subplots()
-        data[feature].value_counts().plot(kind='pie', autopct='%1.1f%%', ax=ax, startangle=90, colors=["#2E86C1","#5DADE2","#AED6F1"])
-        ax.set_ylabel('')
-        st.pyplot(fig)
+        fig = px.pie(data, names=feature, title=f"Pie Chart of {feature}")
+        st.plotly_chart(fig, use_container_width=True)
 
     elif plot_type == "Line Chart":
-        fig, ax = plt.subplots()
-        data[feature].plot(kind='line', ax=ax, color="#2E86C1", linewidth=2)
-        ax.set_xlabel("Index")
-        ax.set_ylabel(feature)
-        st.pyplot(fig)
+        fig = px.line(data, y=feature, title=f"Line Chart of {feature}")
+        st.plotly_chart(fig, use_container_width=True)
 
     elif plot_type == "Boxplot":
-        fig, ax = plt.subplots()
-        data[feature].plot(kind='box', ax=ax, color="#2E86C1")
-        st.pyplot(fig)
+        fig = px.box(data, y=feature, title=f"Boxplot of {feature}")
+        st.plotly_chart(fig, use_container_width=True)
 
     elif plot_type == "Scatter Plot":
-        fig, ax = plt.subplots()
-        ax.scatter(data[x_feature], data[y_feature], alpha=0.7, color="#2E86C1")
-        ax.set_xlabel(x_feature)
-        ax.set_ylabel(y_feature)
-        st.pyplot(fig)
+        fig = px.scatter(data, x=x_feature, y=y_feature, color=x_feature, title=f"Scatter Plot of {x_feature} vs {y_feature}")
+        st.plotly_chart(fig, use_container_width=True)
 
     elif plot_type == "Histogram":
-        fig, ax = plt.subplots()
-        data[feature].plot(kind='hist', bins=20, ax=ax, color="#2E86C1", alpha=0.8)
-        ax.set_xlabel(feature)
-        st.pyplot(fig)
+        fig = px.histogram(data, x=feature, nbins=20, title=f"Histogram of {feature}")
+        st.plotly_chart(fig, use_container_width=True)
 
-# Prediction Page
+# ========== Prediction Page ==========
 elif page == "Prediction":
-    st.markdown('<h1 class="title">🤖 Smart Learning Analytics Platform</h1>', unsafe_allow_html=True)
+    custom_header("🤖 Smart Learning Analytics Platform")
 
     classification_target = 'Pass_Fail'
     regression_target = 'Exam_Score'
@@ -145,14 +161,16 @@ elif page == "Prediction":
     y_pred_class = classifier.predict(X_test_class)
     classification_accuracy = accuracy_score(y_test_class, y_pred_class)
 
-    st.markdown(f"<div class='section result'>✅ Classification Accuracy: {classification_accuracy*100:.2f}%</div>", unsafe_allow_html=True)
-
     regressor = RandomForestRegressor()
     regressor.fit(X_train_reg, y_train_reg)
     y_pred_reg = regressor.predict(X_test_reg)
     rmse = np.sqrt(mean_squared_error(y_test_reg, y_pred_reg))
 
-    st.markdown(f"<div class='section result'>📏 Regression RMSE: {rmse:.2f}</div>", unsafe_allow_html=True)
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric("✅ Classification Accuracy", f"{classification_accuracy*100:.2f}%")
+    with col2:
+        st.metric("📏 Regression RMSE", f"{rmse:.2f}")
 
     st.subheader("📝 Enter student data:")
 
@@ -177,12 +195,20 @@ elif page == "Prediction":
     input_data = input_data.reindex(columns=X_train_class.columns, fill_value=0)
 
     if st.button("🚀 Predict"):
-        predicted_class = classifier.predict(input_data)[0]
-        grade = "🎉 Pass 🎉" if predicted_class == 1 else "❌ Fail ❌"
-        predicted_score = regressor.predict(input_data)[0]
+        with st.spinner("⏳ Analyzing student performance..."):
+            time.sleep(1.5)  # Simulate processing
+            predicted_class = classifier.predict(input_data)[0]
+            grade = "🎉 Pass 🎉" if predicted_class == 1 else "❌ Fail ❌"
+            predicted_score = regressor.predict(input_data)[0]
 
-        st.markdown(f"<div class='result'>Predicted Outcome: {grade}</div>", unsafe_allow_html=True)
-        st.markdown(f"<div class='result'>Predicted Exam Score: {predicted_score:.2f}</div>", unsafe_allow_html=True)
+        st.markdown(
+            f"""
+            <div class='result'>
+            📊 <b>Predicted Outcome:</b> {grade}<br>
+            📝 <b>Predicted Exam Score:</b> {predicted_score:.2f}
+            </div>
+            """, unsafe_allow_html=True
+        )
 
         gif_file = "pass.gif" if predicted_class == 1 else "fail.gif"
         gif_path = os.path.join(BASE_DIR, "gifs", gif_file)
@@ -191,3 +217,13 @@ elif page == "Prediction":
             st.image(gif_path, width=300)
         else:
             st.error(f"GIF file not found: {gif_path}")
+
+# ========== Footer ==========
+st.markdown(
+    """
+    <footer>
+        Made with ❤️ using Streamlit | Smart Learning Analytics Platform © 2025
+    </footer>
+    """,
+    unsafe_allow_html=True
+)
